@@ -1,0 +1,131 @@
+#######################
+# Temperature Logging #
+#######################
+
+Temperature log directory: '/home/cubansandwich/temp_logs/'
+
+Temperature log: '/home/cubansandwich/temp_logs/test.txt'
+
+Calibration directory: '/home/cubansandwich/inst_control/cal_files/'
+
+#################
+# SRS Mainframe #
+#################
+
+SRS Mainframe:
+  moxa:
+      ip: '192.168.127.254'
+      port: 4001
+  1:
+  2:
+    Module: SIM921
+    Thermometer name: UC Head
+    Calibration file: Ultrahead.txt
+  3:
+  4:
+#    Module: SIM921
+#    Thermometer name: IC Head
+#    Calibration file: Interhead.txt
+  5:
+  6:
+    Module: SIM922
+    1: 
+      Thermometer name: D1
+      Calibration file: Default.txt
+    2:
+      Thermometer name: D2
+      Calibration file: Default.txt
+    3:
+      Thermometer name: D3
+      Calibration file: Default.txt
+    4:
+      Thermometer name: D4
+      Calibration file: Default.txt
+  7:
+    Module: SIM922
+    1:
+      Thermometer name: IC Pump
+      Calibration file: Default.txt
+    2:
+      Thermometer name: He4 Pump
+      Calibration file: Default.txt
+    3: 
+      Thermometer name: Mainplate
+      Calibration file: Default.txt
+      Short name: mp
+    4: 
+      Thermometer name: Exchanger
+      Calibration file: Exchanger.txt
+      Short name: hexch
+  8:
+    Module: SIM922
+    1: 
+      Thermometer name: UC Switch
+      Calibration file: Default.txt
+    2:
+      Thermometer name: IC Switch
+      Calibration file: Default.txt
+    3:
+      Thermometer name: He4 Switch
+      Calibration file: Default.txt
+    4:
+      Thermometer name: UC Pump
+      Calibration file: Default.txt
+
+##################
+# Power Supplies #
+##################
+
+Power supplies:
+
+  PS1:
+    moxa:
+      ip: '192.168.127.254'
+      port: 4003
+    out 1:
+      short_name: ucpu
+      long_name: UC Pump
+      v_max: 15
+      kp: 5
+      ki: 1
+      index: 13
+    out 2:
+      short_name: icpu
+      long_name: IC Pump
+      v_max: 15
+      kp: 5
+      ki: 1
+      index: 9
+    out 3:
+      short_name: ucsw
+      long_name: UC Switch
+      v_max: 5
+      kp: 5
+      ki: 1
+      index: 14
+    
+  PS2:
+    moxa:
+      ip: '192.168.127.254'
+      port: 4002
+    out 1:
+      short_name: he4pu
+      long_name: He4 Pump
+      v_max: 25
+      kp: 5
+      ki: 1
+      index: 6   
+    out 2:
+      short_name: icsw
+      long_name: IC Switch
+      v_max: 5
+      kp: 5
+      ki: 1
+      index: 10
+    out 3:
+      short_name: he4sw
+      long_name: He4 Switch
+      v_max: 5
+      kp: 4
+      ki: 1
+      index: 7
