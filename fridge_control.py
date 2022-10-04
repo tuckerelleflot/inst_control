@@ -179,14 +179,17 @@ def cycle_fridge(preheated=False):
             time.sleep(1)
     run_time_sec = 20*60
     print datetime.now().strftime('%H:%M:%S') + ' UTC -- COOLING UC PUMP'
-    for k in range(run_time_sec):
-        try:
-            icsw.set_temp(18)
-            he4sw.set_temp(18)
-            ucsw.set_temp(18)
-            time.sleep(1)
-        except IndexError:
-            time.sleep(1)
+    icsw.set_volt(5)
+    he4sw.set_volt(5)
+    ucsw.set_volt(5)
+    #for k in range(run_time_sec):
+        #try:
+            #icsw.set_temp(18)
+            #he4sw.set_temp(18)
+            #ucsw.set_temp(18)
+            #time.sleep(1)
+        #except IndexError:
+            #time.sleep(1)
 
 def set_ucstage_temp(sp=0.7, kp=100., ucpu_v_max=20.):
 
