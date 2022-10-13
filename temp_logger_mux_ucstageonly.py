@@ -38,6 +38,13 @@ for k in range(1, 9):
     except:
         pass
 
+# define autorange function
+def autorange_resistance(resistance):
+    rans = range(10)
+    bins = np.concatenate(([0], np.logspace(-2, 6, 9), [1e10]))
+    ran = rans[np.argmax(np.histogram(resistance, bins)[0])]
+    return ran
+    
 # make list of all thermometers
 thermometer_names = []
 for slot in slots:
@@ -129,18 +136,24 @@ muxer.close()
 time.sleep(.5)
 
 # autocal sim921
-print ('Autocal SIM921')
-measurer = sim921_interface(ip, port, sim921_slot)
-measurer.autorange_gain(sleep=60)
-measurer.close()
+#print ('Autocal SIM921')
+#measurer = sim921_interface(ip, port, sim921_slot)
+#measurer.autorange_gain(sleep=60)
+#measurer.close()
   
 # Do temperature logging
+FIRST_ITERATION = True
 while True:
+    
+    time.sleep(2)
     
     loop_time = time.time()
 
     data_raw = {}
     data_cal = {}
+    ran = {}
+    if FIRST_ITERATION:
+        ran_prev = {}
 
     try:
 
@@ -158,6 +171,15 @@ while True:
                 cal_file = config[sim925_slot][ucstage_ch]['Calibration file']
                 
                 measurer = sim921_interface(ip, port, slot)
+                
+                if FIRST_ITERATION:
+                    ran[name] = 9
+                    measurer.set_range(ran[name])
+                else:
+                    ran[name] = autorange_resistance(data_raw_prev[name])
+                    if ran[name] != ran_prev[name]:
+                        measurer.set_range(ran[name])
+                        time.sleep(10)
                 
                 x = []
                 for k in range(11):
@@ -193,11 +215,13 @@ while True:
                 data_raw[thermometer_name] = np.nan
                 data_cal[thermometer_name] = np.nan
                 
-        # Print calibrated values to terminal
-        #####################################
-
+        # Print calibrated and raw values to terminal
+        #####################################       
         for key in sorted(data_cal.keys()):
-            print key + format(data_cal[key], '.3f').rjust(20-len(key))
+            s1 = key
+            s2 = format(data_cal[key], '.3f').rjust(20-len(s1))
+            s3 = format(data_raw[key], '.3f').rjust(10)
+            print s1+s2+s3
         print ''
 
         # Save calibrate data to save_cal_file
@@ -248,7 +272,13 @@ while True:
             f.write('\n' + str(loop_time))
             for key in sorted(data_raw.keys()):
                 f.write(',' + str(data_raw[key]))
-
+        
+        # cache data_raw and ran for autorange on next iteration
+        ################################################
+        data_raw_prev = data_raw.copy()
+        ran_prev = ran.copy()
+        FIRST_ITERATION = False
+        
     except KeyboardInterrupt as e:
 
         try:
