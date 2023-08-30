@@ -190,7 +190,106 @@ def cycle_fridge(preheated=False):
             #time.sleep(1)
         #except IndexError:
             #time.sleep(1)
+            
+def cycle_he4(preheated=False):
+    
+    print datetime.now().strftime('%H:%M:%S') + ' UTC -- STARTING HE4 CYCLE'
+    
+    if not preheated:
+        # turn off pump heaters
+        print datetime.now().strftime('%H:%M:%S') + ' UTC -- TURNING OFF PUMP HEATERS'
+        ucpu.set_volt(0)
+        icpu.set_volt(0)
+        he4pu.set_volt(0)
+    
+        # cool switches 
+        print datetime.now().strftime('%H:%M:%S') + ' UTC -- COOLING SWITCHES'
+        ucsw.set_volt(0)
+        icsw.set_volt(0)
+        he4sw.set_volt(0)
+        while True:
+            if ucsw.get_temp() < 7 and icsw.get_temp() < 7 and he4sw.get_temp() < 7:
+                break
+            else:
+                time.sleep(10)
+        
+        # heat pumps 
+        print datetime.now().strftime('%H:%M:%S') + ' UTC -- HEATING PUMPS'
+        he4pu.set_volt(25)
+        run_time_sec = 1*60*60 # 1 hour
+        for k in range(run_time_sec):
+            if he4pu.get_temp()>50:
+                break
+            else:
+                try:
+                    ucpu.set_temp(30)
+                    icpu.set_temp(30)
+                except IndexError:
+                    print('Index error')
+                time.sleep(1)
+    
+    # turn off he4pu and let mainplate cool off a bit
+    print datetime.now().strftime('%H:%M:%S') + ' UTC -- LETTING MAINPLATE COOL'
+    he4pu.set_volt(0)
+    run_time_sec = 1*60*60 # 1 hour
+    for k in range(run_time_sec):
+        try:
+            ucpu.set_temp(30)
+            icpu.set_temp(30)  
+        except IndexError:
+            print('Index error')
+        time.sleep(1)
+    
+    # heat he4 switch, uc pump, ic pump
+    print datetime.now().strftime('%H:%M:%S') + ' UTC -- COOLING HE4 PUMP'
+    #while True:
+    for i in range(6*60*60): # 6 hours
+        try:
+            ucpu.set_temp(30)
+            icpu.set_temp(30)
+            he4sw.set_temp(18)
+        except IndexError:
+            print('Index error')
+        time.sleep(1)
 
+def set_ucstage_temp_he4(sp=1., kp=100., he4pu_v_max=20., he4pu_Thi=20.):
+    dt = 1.
+
+    while True:
+
+        # PID he4 switch to 18 K
+        he4sw.set_temp(18)
+
+        # PID icpu and ucpu to 30 K
+        icpu.set_temp(30)
+        ucpu.set_temp(30)
+
+        ### PID he4pu temp based on ucstage temp
+
+        pv = ucstage.get_temp()
+
+        err = sp - pv
+        vp = err * kp
+
+        vi = 0
+
+        v = vp + vi
+
+        n = 20
+        v = v * (1 - (he4pu.get_temp() / he4pu_Thi) ** n)
+
+        if v > he4pu_v_max:
+            v = he4pu_v_max
+        if v < 0.:
+            v = 0.
+
+        he4pu.set_volt(v)
+
+        print(v)
+        print('')
+
+        time.sleep(dt)
+        
 def set_ucstage_temp(sp=0.7, kp=100., ucpu_v_max=20.):
 
     # Use this to set the UC head temperature
