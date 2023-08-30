@@ -188,13 +188,3 @@ class Serial_TCPServer(object):
 	    self.write(msg)
 	    time.sleep(.1)
 	    return self.readline()
-
-def test1():
-	x = Serial_TCPServer(('google.com',80),timeout=1.15)
-	x.write('GET /\n')
-	print x.readexactly(1000)
-
-def test2():
-	x = Serial_TCPServer(('google.com',80),timeout=0.15)
-	x.write('GET /\n')
-	print x.read(10000)
