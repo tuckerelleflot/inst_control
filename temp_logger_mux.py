@@ -45,7 +45,6 @@ def autorange_resistance(resistance):
     ran = rans[np.argmax(np.histogram(resistance, bins)[0])]
     return ran
 
-        
 # Make calibrator functions
 cal_files = []
 
@@ -94,14 +93,19 @@ calibrator = {}
 cal_temp = {}
 cal_raw = {}
 for cal_file in cal_files:
-    cal_temp[cal_file], cal_raw[cal_file] = np.loadtxt(cal_dir + cal_file, skiprows=1, delimiter=',', unpack=True) 
+    cal_temp[cal_file], cal_raw[cal_file] = np.loadtxt(cal_dir + cal_file, 
+                                                       skiprows=1, 
+                                                       delimiter=',', 
+                                                       unpack=True) 
     idx = np.argsort(cal_raw[cal_file])
     cal_temp[cal_file] = cal_temp[cal_file][idx]
     cal_raw[cal_file] = cal_raw[cal_file][idx]
-    calibrator[cal_file] = lambda raw: np.interp(raw, cal_raw[cal_file], cal_temp[cal_file])
+    calibrator[cal_file] = lambda raw: np.interp(raw, cal_raw[cal_file],
+                                                 cal_temp[cal_file])
 
 # Do temperature logging
 FIRST_ITERATION=True
+counter = 0
 while True:
     
     time.sleep(2)
@@ -192,56 +196,56 @@ while True:
             s3 = format(data_raw[key], '.3f').rjust(10)
             print s1+s2+s3
         print ''
-
-        # Save calibrate data to save_cal_file
-        ######################################
-
-        # If save_file_cal does not exist, make it
-        # and write the header
         
-        try:
-            with open(save_file_cal, 'r') as f:
-                pass
-        except IOError: 
-            with open(save_file_cal, 'w') as f:
-                f.write('Time')
-                for key in sorted(data_cal.keys()):
-                    f.write(',' + str(key))
-                f.write('\n')
-                
-        # Append data_cal to save_file_cal
-        write_str = str(loop_time)
-        for key in sorted(data_cal.keys()):
-            write_str += ',' + str(data_cal[key])
-        write_str += '\n'
-        with open(save_file_cal, 'a') as f:
-            f.write(write_str)
+        if counter > 2:
+            # Save calibrate data to save_cal_file
+            ######################################
+
+            # If save_file_cal does not exist, make it
+            # and write the header
             
-        # Save raw data to save_file_raw
-        ################################
+            try:
+                with open(save_file_cal, 'r') as f:
+                    pass
+            except IOError: 
+                with open(save_file_cal, 'w') as f:
+                    f.write('Time')
+                    for key in sorted(data_cal.keys()):
+                        f.write(',' + str(key))
+                    
+            # Append data_cal to save_file_cal
+            write_str = '\n' + str(loop_time)
+            for key in sorted(data_cal.keys()):
+                write_str += ',' + str(data_cal[key])
+            with open(save_file_cal, 'a') as f:
+                f.write(write_str)
+                
+            # Save raw data to save_file_raw
+            ################################
 
-        # If save_file_raw does not exist, make it
-        # and write the header
-        try:
-            with open(save_file_raw, 'r') as f:
-                pass
-        except IOError:
-            with open(save_file_raw, 'w') as f:
-                f.write('Time')
-                for key in sorted(data_cal.keys()):
-                    f.write(',' + str(key))
+            # If save_file_raw does not exist, make it
+            # and write the header
+            try:
+                with open(save_file_raw, 'r') as f:
+                    pass
+            except IOError:
+                with open(save_file_raw, 'w') as f:
+                    f.write('Time')
+                    for key in sorted(data_cal.keys()):
+                        f.write(',' + str(key))
 
-        # Append data_raw to save_file_raw
-        with open(save_file_raw, 'a') as f:
-            f.write('\n' + str(loop_time))
-            for key in sorted(data_raw.keys()):
-                f.write(',' + str(data_raw[key]))
+            # Append data_raw to save_file_raw
+            with open(save_file_raw, 'a') as f:
+                f.write('\n' + str(loop_time))
+                for key in sorted(data_raw.keys()):
+                    f.write(',' + str(data_raw[key]))
 
         # cache data_raw and ran for autorange on next iteration
         ################################################
         data_raw_prev = data_raw.copy()
         ran_prev = ran.copy()
         FIRST_ITERATION = False
+        counter += 1
         
     except KeyboardInterrupt as e:
 
